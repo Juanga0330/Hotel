@@ -1,14 +1,27 @@
 package Modelo;
+
 public class Cliente {
     private String nombre;
-    private String cedula;
-    
-    public Cliente(String nombre, String cedula) {
-        this.nombre = nombre;
-        this.cedula = cedula;
-    }
-    
-    public String getNombre() { return nombre; }
-    public String getCedula() { return cedula; }
-}
+    private String documento;
 
+    public Cliente(String nombre, String documento) {
+        this.nombre = nombre;
+        this.documento = documento;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getDocumento() {
+        return documento;
+    }
+
+    @Override
+    public String toString() {
+        return "Cliente{" +
+                "nombre='" + nombre + '\'' +
+                ", documento='" + documento + '\'' +
+                '}';
+    }
+}

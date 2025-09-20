@@ -1,81 +1,104 @@
 package Modelo;
+
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Scanner;
 
 public class Recepcion {
-    private Hotel hotel;
-    private Scanner scanner;
-    
-    public Recepcion() {
-        hotel = new Hotel("Hotel Paradise");
-        scanner = new Scanner(System.in);
-    }
-    
-    public void mostrarMenu() {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Hotel hotel = new Hotel("Hotel Java");
+        hotel.cargarHabitacionesDesdeCSV("habitaciones.csv");
+
+        Cliente cliente = null;
+        Reserva reserva = null;
         int opcion;
+
         do {
-            System.out.println("\n=== " + hotel.getNombre() + " ===");
-            System.out.println("1. Listar habitaciones disponibles");
-            System.out.println("2. Crear reserva");
-            System.out.println("3. Mostrar reservas");
+            System.out.println("\n===== MENÚ HOTEL =====");
+            System.out.println("1. Crear Cliente");
+            System.out.println("2. Ver Habitaciones");
+            System.out.println("3. Hacer Reserva");
+            System.out.println("4. Ver Reserva");
             System.out.println("0. Salir");
-            System.out.print("Opción: ");
-            
+            System.out.print("Seleccione una opción: ");
             opcion = scanner.nextInt();
             scanner.nextLine();
-            
+
             switch (opcion) {
-                case 1: listarHabitaciones(); break;
-                case 2: crearReserva(); break;
-                case 3: mostrarReservas(); break;
+                case 1:
+                    System.out.print("Ingrese el nombre del cliente: ");
+                    String nombre = scanner.nextLine();
+                    System.out.print("Ingrese el documento del cliente: ");
+                    String documento = scanner.nextLine();
+                    cliente = new Cliente(nombre, documento);
+                    System.out.println(" Cliente creado: " + cliente);
+                    break;
+
+                case 2:
+                    System.out.println("Habitaciones disponibles:");
+                    for (Habitacion h : hotel.getHabitaciones()) {
+                        System.out.println(h);
+                    }
+                    break;
+
+                case 3:
+                    if (cliente == null) {
+                        System.out.println(" Primero debe crear un cliente.");
+                        break;
+                    }
+                    System.out.println("Seleccione número de habitación:");
+                    for (Habitacion h : hotel.getHabitaciones()) {
+                        if (h.isDisponible()) {
+                            System.out.println(h.getNumero() + " - " + h.getTipo() + " - $" + h.getPrecio());
+                        }
+                    }
+                    int numHab = scanner.nextInt();
+                    scanner.nextLine();
+
+                    Habitacion habitacionSeleccionada = null;
+                    for (Habitacion h : hotel.getHabitaciones()) {
+                        if (h.getNumero() == numHab && h.isDisponible()) {
+                            habitacionSeleccionada = h;
+                            break;
+                        }
+                    }
+
+                    if (habitacionSeleccionada == null) {
+                        System.out.println("⚠️ Habitación no válida o no disponible.");
+                        break;
+                    }
+
+                    System.out.print("Ingrese cantidad de días de estadía: ");
+                    int dias = scanner.nextInt();
+                    scanner.nextLine();
+
+                    reserva = new Reserva(
+                            cliente,
+                            habitacionSeleccionada,
+                            LocalDateTime.now(),
+                            dias
+                    );
+                    System.out.println(" Reserva creada: " + reserva);
+                    break;
+
+                case 4:
+                    if (reserva == null) {
+                        System.out.println("No hay reservas realizadas.");
+                    } else {
+                        System.out.println("Reserva actual:");
+                        System.out.println(reserva);
+                    }
+                    break;
+
+                case 0:
+                    System.out.println(" Gracias por usar el sistema.");
+                    break;
+
+                default:
+                    System.out.println(" Opción no válida.");
             }
         } while (opcion != 0);
-    }
-    
-    private void listarHabitaciones() {
-        System.out.println("\n=== HABITACIONES DISPONIBLES ===");
-        List<Habitacion> disponibles = hotel.getHabitacionesDisponibles();
-        for (Habitacion habitacion : disponibles) {
-            System.out.println(habitacion);
-        }
-    }
-    
-    private void crearReserva() {
-        System.out.print("Nombre cliente: ");
-        String nombre = scanner.nextLine();
-        System.out.print("Cédula: ");
-        String cedula = scanner.nextLine();
-        
-        Cliente cliente = new Cliente(nombre, cedula);
-        
-        listarHabitaciones();
-        System.out.print("Número de habitación: ");
-        int numero = scanner.nextInt();
-        
-        Habitacion habitacion = hotel.buscarHabitacion(numero);
-        if (habitacion == null) {
-            System.out.println("Habitación no disponible");
-            return;
-        }
-        
-        System.out.print("Días de estadía: ");
-        int dias = scanner.nextInt();
-        
-        LocalDateTime fechaEntrada = LocalDateTime.now().plusDays(1).withHour(15).withMinute(0);
-        Reserva reserva = new Reserva(cliente, habitacion, fechaEntrada, dias);
-        
-        hotel.crearReserva(reserva);
-        System.out.println("Reserva creada: " + reserva);
-    }
-    
-    private void mostrarReservas() {
-        System.out.println("\n=== RESERVAS ===");
-        for (Reserva reserva : hotel.getReservas()) {
-            System.out.println(reserva);
-        }
-    }
-    
-    public static void main(String[] args) {
-        new Recepcion().mostrarMenu();
+
+        scanner.close();
     }
 }
